@@ -1,15 +1,67 @@
 import React from "react";
+import useApplicationData from "hooks/useApplicationData";
+
 
 import "components/Application.scss";
+import Appointment from "components/Appointment";
+import { getAppointmentsForDay, getInterview, getInterviewersForDay } from "helpers/selectors";
+
+import DayList from "components/DayList";
 
 export default function Application(props) {
+
+  const {
+    state,
+    setDay,
+    bookInterview,
+    cancelInterview
+  } = useApplicationData();
+
+  const appointments = getAppointmentsForDay(state, state.day);
+
+  const interviewers = getInterviewersForDay(state, state.day);
+
+  function interviewSpots (bookings) {
+    return bookings.map((booking) => { 
+      const interview = getInterview(state, booking.interview);
+      const appointment = {...booking, interview: interview}
+      
+      return (
+        <Appointment
+        key={appointment.id}
+        bookInterview={bookInterview}
+        cancelInterview={cancelInterview}
+        interviewers ={interviewers}
+        {...appointment}
+        />
+        )
+    })
+  }
+
   return (
     <main className="layout">
       <section className="sidebar">
-        {/* Replace this with the sidebar elements during the "Project Setup & Familiarity" activity. */}
+        <img
+          className="sidebar--centered"
+          src="images/logo.png"
+          alt="Interview Scheduler"
+        />
+        <hr className="sidebar__separator sidebar--centered" />
+        <nav className="sidebar__menu"><DayList
+          days={state.days}
+          day={state.day}
+          setDay={setDay}
+        /></nav>
+        <img
+          className="sidebar__lhl sidebar--centered"
+          src="images/lhl.png"
+          alt="Lighthouse Labs"
+        />
       </section>
       <section className="schedule">
-        {/* Replace this with the schedule elements durint the "The Scheduler" activity. */}
+ 
+{interviewSpots(appointments)}
+        <Appointment key="last" time="5pm" />
       </section>
     </main>
   );
